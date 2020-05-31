@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import menus from '@/components/menus'
 import search from '@/components/search'
 import help from '@/components/help'
+import about from '@/components/about'
 
 Vue.use(Router)
 
@@ -14,11 +15,14 @@ export default new Router({
       component: menus,
       children: [
         {
-          path: '/search',
+          path: '',
           component: search
         }, {
           path: '/help',
           component: help
+        }, {
+          path: '/about',
+          component: about
         }]
     }
   ]

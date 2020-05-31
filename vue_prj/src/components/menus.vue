@@ -1,17 +1,31 @@
 <template>
   <el-container>
-    <h1>{{extensionName}}</h1>
-    <el-divider></el-divider>
-    <el-menu default-active="/">
-      <el-menu-item index="/search">
-        <i class="el-icon-menu"></i>
-        <span slot="title">导航一</span>
-      </el-menu-item>
-      <el-menu-item index="/help">
-        <i class="el-icon-menu"></i>
-        <span slot="title">导航二</span>
-      </el-menu-item>
-    </el-menu>
+    <el-header class="header">
+      <h3>{{extensionName}}</h3>
+    </el-header>
+    <el-container>
+      <el-aside width="150px">
+        <el-menu router default-active="/" class="aside">
+          <el-menu-item index="/">
+            <i class="el-icon-search"></i>
+            <span slot="title">{{navSearch}}</span>
+          </el-menu-item>
+          <el-menu-item index="help">
+            <i class="el-icon-help"></i>
+            <span slot="title">{{navHelp}}</span>
+          </el-menu-item>
+          <el-menu-item index="about">
+            <i class="el-icon-user"></i>
+            <span slot="title">{{navAbout}}</span>
+          </el-menu-item>
+        </el-menu>
+      </el-aside>
+      <el-main>
+        <keep-alive>
+          <router-view></router-view>
+        </keep-alive>
+      </el-main>
+    </el-container>
   </el-container>
 </template>
 
@@ -20,23 +34,26 @@ export default {
   data () {
     return {
       isCollapse: true,
-      extensionName: '右键自定义搜索设置'
+      extensionName: '右键自定义搜索设置',
+      navSearch: '搜索引擎',
+      navHelp: '使用帮助',
+      navAbout: '关于'
     }
   },
   methods: {
-    handleOpen (key, keyPath) {
-      console.log(key, keyPath)
-    },
-    handleClose (key, keyPath) {
-      console.log(key, keyPath)
-    }
   }
 }
 </script>
 
 <style>
-.el-menu-vertical-demo:not(.el-menu--collapse) {
-  width: 200px;
-  min-height: 400px;
-}
+  .header {
+    background-color: #20222A;
+    color: white;
+  }
+  .aside {
+    height: 90vh;
+    min-height: 90%;
+    margin: 5px;
+    background-color: white;
+  }
 </style>
