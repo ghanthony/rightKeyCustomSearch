@@ -35,7 +35,7 @@ export default {
     return {
       isCollapse: true,
       extensionName: '右键自定义搜索设置',
-      navSearch: '搜索引擎',
+      navSearch: '搜索列表',
       navHelp: '使用帮助',
       navAbout: '关于'
     }
