@@ -7,14 +7,14 @@
         <el-row :gutter="20" style="max-width: 800px">
           <el-col class="col" :span="4">
             <el-input
-              readonly="true"
+              readonly=true
               :value="searchExampleNameLabel"
               :disabled="true">
             </el-input>
           </el-col>
           <el-col class="col" :span="13">
             <el-input
-              readonly="true"
+              readonly=true
               :value="searchExampleUrlLabel"
               :disabled="true">
             </el-input>
@@ -61,10 +61,29 @@
             <el-button
               icon="el-icon-plus"
               style="width: 100%; border-radius: 0px; margin-top : -1px; border-style: dotted"
-              @click="handleAdd()"></el-button>
+              @click="handleAdd()">
+            </el-button>
           </el-col>
         </el-row>
       </el-card>
+      <el-dialog
+        :title="searchOpTitleLabel"
+        :visible.sync="dialogVisible"
+        width="30%"
+        :before-close="handleClose">
+          <el-form :model="form" label-width="40px">
+            <el-form-item :label="searchNameLabel">
+              <el-input v-model="form.name" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item :label="searchUrlLabel">
+              <el-input v-model="form.url" autocomplete="off"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="toOp()">确 定</el-button>
+          </div>
+        </el-dialog>
   </div>
 </template>
 
@@ -78,17 +97,67 @@ export default {
       searchNameLabel: '名字',
       searchUrlLabel: '链接',
       searchOpLabel: '操作',
+      searchOpTitleLabel: '',
+      isOpTypeAdd: true,
+      searchOpTitleAddLabel: '添加搜索项',
+      searchOpTitleEditLabel: '编辑搜索项',
+      dialogVisible: false,
+      maxSearchNo: 10,
+      overSizeAlert: '最多添加%s个搜索项',
+      emptyParamAlert: '搜索项参数不能为空',
       tableData: [
-      ]
+        {
+          name: '谷歌',
+          url: 'http://www.google.com#q=%s'
+        }, {
+          name: '虾米找歌',
+          url: 'http://www.xiami.com/search/song?key=%s'
+        }
+      ],
+      form: {
+        name: '',
+        url: '',
+        index: 0
+      }
     }
   },
   methods: {
-    handleEdit () {
-
+    handleEdit (index, row) {
+      this.isOpTypeAdd = false
+      this.searchOpTitleLabel = this.searchOpTitleEditLabel
+      this.$set(this.form, 'name', row.name)
+      this.$set(this.form, 'url', row.url)
+      this.$set(this.form, 'index', index)
+      this.showDialog()
     },
-    handleDelete () {
+    handleDelete (index, row) {
+      this.tableData.splice(index, 1)
     },
     handleAdd () {
+      this.isOpTypeAdd = true
+      this.searchOpTitleLabel = this.searchOpTitleAddLabel
+      this.showDialog()
+    },
+    toOp () {
+      this.dialogVisible = false
+      if (this.tableData.length >= this.maxSearchNo) {
+        alert(this.overSizeAlert.replace('%s', this.maxSearchNo))
+        return
+      }
+      if (!this.form.name || !this.form.url) {
+        alert(this.emptyParamAlert)
+        return
+      }
+      if (this.isOpTypeAdd) {
+        this.tableData.push({name: this.form.name, url: this.form.url})
+      } else {
+        this.tableData.$set(this.tableData, this.form.index, {name: this.form.name, url: this.form.url})
+      }
+    },
+    showDialog () {
+      this.$set(this.form, 'name', '')
+      this.$set(this.form, 'url', '')
+      this.dialogVisible = true
     }
   }
 }
