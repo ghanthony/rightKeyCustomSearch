@@ -4,38 +4,45 @@
         <el-row>
           <el-col class="col" :span="24">{{searchExampleLabel}}</el-col>
         </el-row>
-        <el-row :gutter="20" style="max-width: 800px">
+        <el-row :gutter="20" style="max-width: 800px; padding-left:8px">
           <el-col class="col" :span="4">
-            <el-input
-              readonly=true
-              :value="searchExampleNameLabel"
-              :disabled="true">
-            </el-input>
+            <el-tag type="info">{{searchExampleNameLabel}}</el-tag>
           </el-col>
           <el-col class="col" :span="13">
-            <el-input
-              readonly=true
-              :value="searchExampleUrlLabel"
-              :disabled="true">
-            </el-input>
+            <el-tag type="info">{{searchExampleUrlLabel}}</el-tag>
           </el-col>
         </el-row>
         <el-row  style="max-width: 800px;">
-          <el-table :data="tableData" header-align="center">
+          <el-table :data="tableData" header-align="center" id='crTable' row-key="id">
             <el-table-column
-              prop="name"
               :label="searchNameLabel"
+              :key='col_1'
               width='133px'>
+              <template slot-scope="scope">
+                <el-tag
+                  type='info'
+                  effect="plain">
+                  {{scope.row.name}}
+                </el-tag>
+              </template>
             </el-table-column>
             <el-table-column
-              prop="url"
               :label="searchUrlLabel"
+              :key='col_2'
               width='483px'>
+              <template slot-scope="scope">
+                <el-tag
+                  type='info'
+                  effect="plain">
+                  {{scope.row.url}}
+                </el-tag>
+              </template>
             </el-table-column>
             <el-table-column
               prop="url"
               fixed="right"
               :label="searchOpLabel"
+              :key='col_3'
               width='183px'>
               <template slot-scope="scope">
                 <el-button
@@ -48,10 +55,7 @@
                   type="danger"
                   icon="el-icon-delete"
                   @click="handleDelete(scope.$index, scope.row)"></el-button>
-                <el-button
-                  size="small"
-                  type="info"
-                  icon="el-icon-sort"></el-button>
+                <i class="el-icon-sort handle"></i>
               </template>
             </el-table-column>
           </el-table>
@@ -69,11 +73,10 @@
       <el-dialog
         :title="searchOpTitleLabel"
         :visible.sync="dialogVisible"
-        width="30%"
-        :before-close="handleClose">
+        width="30%">
           <el-form :model="form" label-width="40px">
             <el-form-item :label="searchNameLabel">
-              <el-input v-model="form.name" autocomplete="off"></el-input>
+              <el-input type="text" v-model="form.name" autocomplete="off" maxlength="6" show-word-limit></el-input>
             </el-form-item>
             <el-form-item :label="searchUrlLabel">
               <el-input v-model="form.url" autocomplete="off"></el-input>
@@ -81,13 +84,15 @@
           </el-form>
           <div slot="footer" class="dialog-footer">
             <el-button @click="dialogVisible = false">取 消</el-button>
-            <el-button type="primary" @click="toOp()">确 定</el-button>
+            <el-button type="primary" @click="toAddOrEdit()">确 定</el-button>
           </div>
         </el-dialog>
   </div>
 </template>
 
 <script>
+import Sortable from 'sortablejs'
+
 export default {
   data () {
     return {
@@ -121,6 +126,9 @@ export default {
       }
     }
   },
+  mounted () {
+    this.rowDrop()
+  },
   methods: {
     handleEdit (index, row) {
       this.isOpTypeAdd = false
@@ -128,7 +136,7 @@ export default {
       this.$set(this.form, 'name', row.name)
       this.$set(this.form, 'url', row.url)
       this.$set(this.form, 'index', index)
-      this.showDialog()
+      this.dialogVisible = true
     },
     handleDelete (index, row) {
       this.tableData.splice(index, 1)
@@ -136,9 +144,11 @@ export default {
     handleAdd () {
       this.isOpTypeAdd = true
       this.searchOpTitleLabel = this.searchOpTitleAddLabel
-      this.showDialog()
+      this.$set(this.form, 'name', '')
+      this.$set(this.form, 'url', '')
+      this.dialogVisible = true
     },
-    toOp () {
+    toAddOrEdit () {
       this.dialogVisible = false
       if (this.tableData.length >= this.maxSearchNo) {
         alert(this.overSizeAlert.replace('%s', this.maxSearchNo))
@@ -151,13 +161,19 @@ export default {
       if (this.isOpTypeAdd) {
         this.tableData.push({name: this.form.name, url: this.form.url})
       } else {
-        this.tableData.$set(this.tableData, this.form.index, {name: this.form.name, url: this.form.url})
+        this.$set(this.tableData, this.form.index, {name: this.form.name, url: this.form.url})
       }
     },
-    showDialog () {
-      this.$set(this.form, 'name', '')
-      this.$set(this.form, 'url', '')
-      this.dialogVisible = true
+    rowDrop () {
+      const tbody = document.getElementById('crTable').querySelector('.el-table__body-wrapper tbody')
+      const _this = this
+      Sortable.create(tbody, {
+        handle: '.handle',
+        onEnd: evt => {
+          const currRow = _this.tableData.splice(evt.oldIndex, 1)[0]
+          _this.tableData.splice(evt.newIndex, 0, currRow)
+        }
+      })
     }
   }
 }

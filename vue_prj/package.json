@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "element-ui": "^2.13.2",
+    "sortablejs": "^1.10.2",
     "vue": "^2.5.2",
     "vue-router": "^3.3.1"
   },
