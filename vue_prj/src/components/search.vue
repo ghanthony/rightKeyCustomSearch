@@ -13,10 +13,9 @@
           </el-col>
         </el-row>
         <el-row  style="max-width: 800px;">
-          <el-table :data="tableData" header-align="center" id='crTable' row-key="id">
+          <el-table :data="tableData" header-align="center" id='crTable' row-key="name">
             <el-table-column
               :label="searchNameLabel"
-              :key='col_1'
               width='133px'>
               <template slot-scope="scope">
                 <el-tag
@@ -28,7 +27,6 @@
             </el-table-column>
             <el-table-column
               :label="searchUrlLabel"
-              :key='col_2'
               width='483px'>
               <template slot-scope="scope">
                 <el-tag
@@ -39,11 +37,8 @@
               </template>
             </el-table-column>
             <el-table-column
-              prop="url"
-              fixed="right"
               :label="searchOpLabel"
-              :key='col_3'
-              width='183px'>
+              width='128px'>
               <template slot-scope="scope">
                 <el-button
                   size="small"
@@ -55,7 +50,13 @@
                   type="danger"
                   icon="el-icon-delete"
                   @click="handleDelete(scope.$index, scope.row)"></el-button>
-                <i class="el-icon-sort handle"></i>
+              </template>
+            </el-table-column>
+            <el-table-column
+              className='dragHandle'
+              width='55px'>
+              <template>
+                <i class="el-icon-sort el-button el-button--small" style="margin-left: -5px"></i>
               </template>
             </el-table-column>
           </el-table>
@@ -83,8 +84,8 @@
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogVisible = false">取 消</el-button>
-            <el-button type="primary" @click="toAddOrEdit()">确 定</el-button>
+            <el-button @click="dialogVisible = false">{{cancelStr}}</el-button>
+            <el-button type="primary" @click="toAddOrEdit()">{{okStr}}</el-button>
           </div>
         </el-dialog>
   </div>
@@ -110,6 +111,9 @@ export default {
       maxSearchNo: 10,
       overSizeAlert: '最多添加%s个搜索项',
       emptyParamAlert: '搜索项参数不能为空',
+      sameNameParamAlert: '搜索项不能同名',
+      cancelStr: '取 消',
+      okStr: '确 定',
       tableData: [
         {
           name: '谷歌',
@@ -149,7 +153,6 @@ export default {
       this.dialogVisible = true
     },
     toAddOrEdit () {
-      this.dialogVisible = false
       if (this.tableData.length >= this.maxSearchNo) {
         alert(this.overSizeAlert.replace('%s', this.maxSearchNo))
         return
@@ -159,19 +162,28 @@ export default {
         return
       }
       if (this.isOpTypeAdd) {
+        const _this = this
+        if (this.tableData.find((item) => (item.name === _this.form.name))) {
+          alert(this.sameNameParamAlert)
+          return
+        }
         this.tableData.push({name: this.form.name, url: this.form.url})
       } else {
         this.$set(this.tableData, this.form.index, {name: this.form.name, url: this.form.url})
       }
+      this.dialogVisible = false
     },
     rowDrop () {
       const tbody = document.getElementById('crTable').querySelector('.el-table__body-wrapper tbody')
       const _this = this
       Sortable.create(tbody, {
-        handle: '.handle',
+        handle: '.dragHandle',
         onEnd: evt => {
-          const currRow = _this.tableData.splice(evt.oldIndex, 1)[0]
-          _this.tableData.splice(evt.newIndex, 0, currRow)
+          const oldRow = _this.tableData[evt.oldIndex]
+          _this.tableData.splice(evt.oldIndex, 1)
+          console.log('evt.oldIndex ' + evt.oldIndex)
+          _this.tableData.splice(evt.newIndex, 0, oldRow)
+          console.log('evt.newIndex ' + evt.newIndex)
         }
       })
     }
@@ -182,5 +194,8 @@ export default {
 <style>
   .col {
     padding-bottom: 20px;
+  }
+  .dragHandle {
+    cursor: move;
   }
 </style>
