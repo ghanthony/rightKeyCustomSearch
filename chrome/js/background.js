@@ -18,6 +18,16 @@
   }
 };
 
+function addOptionsToMenus() {
+
+  chrome.storage.sync.get(['searchOptions'], function(result) {
+    alert('Value currently is ' + result.key);
+    
+  });
+  chrome.contextMenus.removeAll();
+
+}
+
 var hightligh = chrome.contextMenus.create({"title": "高亮选中文本", "contexts":["selection"],"id":"hightligh"});
 var googleSearch = chrome.contextMenus.create({"title": "谷歌","contexts":["selection"],"id":"googleSearch"});
 var googleSearch = chrome.contextMenus.create({"title": "虾米音乐","contexts":["selection"],"id":"xiamiSearch"});
@@ -27,3 +37,18 @@ var googleSearch = chrome.contextMenus.create({"title": "微博找人","contexts
 var unhightligh = chrome.contextMenus.create({"title": "清除高亮", "contexts":["all"],"id":"unHightligh"});
 chrome.contextMenus.onClicked.addListener(onClickHandler);
 
+chrome.runtime.onStartup.addListener(function() {
+  alert("onStartup in background.js");
+});
+
+chrome.runtime.onInstalled.addListener(function() {
+  alert("onInstalled in background.js");
+});
+
+chrome.browserAction.onClicked.addListener(function(tab) {
+  chrome.runtime.openOptionsPage();
+})
+
+chrome.storage.onChanged.addListener(function(changes, areaName) {
+
+}) 

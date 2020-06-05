@@ -56,7 +56,7 @@
               className='dragHandle'
               width='55px'>
               <template>
-                <i class="el-icon-sort el-button el-button--small" style="margin-left: -5px"></i>
+                <i class="el-icon-rank"></i>
               </template>
             </el-table-column>
           </el-table>
