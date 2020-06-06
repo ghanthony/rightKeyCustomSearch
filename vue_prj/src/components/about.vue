@@ -21,5 +21,6 @@ export default {
 <style>
   .about_line{
     line-height: 2;
+    font-size: 14px;
   }
 </style>

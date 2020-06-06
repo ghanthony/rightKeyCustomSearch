@@ -1,54 +1,43 @@
-﻿function onClickHandler(info, tab) {
-  if (info.menuItemId == "hightligh" ) {
-    chrome.tabs.sendMessage(tab.id, {func:"highlight",arg:info.selectionText});
-  } else if (info.menuItemId == "unHightligh") {
-    chrome.tabs.sendMessage(tab.id, {func:"unHighlight",arg:info.selectionText});
-  } else if (info.menuItemId == "googleSearch") {
-    chrome.tabs.create({active:true,index:tab.index+1,url:"http://www.google.com#q="+info.selectionText});
-  } else if (info.menuItemId == "weiboSearch") {
-    chrome.tabs.create({active:true,index:tab.index+1,url:"http://s.weibo.com/user/"+ info.selectionText +"&Refer=SUer_box"});
-  } else if (info.menuItemId == "xiamiSearch") {
-    chrome.tabs.create({active:true,index:tab.index+1,url:"http://www.xiami.com/search/song?key="+info.selectionText});
-  } else if (info.menuItemId == "doubanMovieSearch") {
-    chrome.tabs.create({active:true,index:tab.index+1,url:"http://movie.douban.com/subject_search?search_text="+info.selectionText+"&cat=1002"});
-  } else if (info.menuItemId == "taobaoSearch"){
-    chrome.tabs.create({active:true,index:tab.index+1,url:"http://s.taobao.com/search?q="+info.selectionText});
-  }else {
-    alert("error in background.js");
-  }
-};
+﻿function addOptionsToMenus() {
 
-function addOptionsToMenus() {
-
-  chrome.storage.sync.get(['searchOptions'], function(result) {
-    alert('Value currently is ' + result.key);
-    
+  chrome.storage.sync.get('searchOptions', function(result) {
+    if (chrome.runtime.lastError) {
+      alert(chrome.runtime.lastError.message);
+      return;
+    }
+    let searchOptions = result['searchOptions'];
+    refreshMenus(searchOptions);
   });
-  chrome.contextMenus.removeAll();
-
 }
 
-var hightligh = chrome.contextMenus.create({"title": "高亮选中文本", "contexts":["selection"],"id":"hightligh"});
-var googleSearch = chrome.contextMenus.create({"title": "谷歌","contexts":["selection"],"id":"googleSearch"});
-var googleSearch = chrome.contextMenus.create({"title": "虾米音乐","contexts":["selection"],"id":"xiamiSearch"});
-var googleSearch = chrome.contextMenus.create({"title": "豆瓣电影","contexts":["selection"],"id":"doubanMovieSearch"});
-var googleSearch = chrome.contextMenus.create({"title": "淘宝找货","contexts":["selection"],"id":"taobaoSearch"});
-var googleSearch = chrome.contextMenus.create({"title": "微博找人","contexts":["selection"],"id":"weiboSearch"});
-var unhightligh = chrome.contextMenus.create({"title": "清除高亮", "contexts":["all"],"id":"unHightligh"});
-chrome.contextMenus.onClicked.addListener(onClickHandler);
+function refreshMenus(searchOptions) {
 
-chrome.runtime.onStartup.addListener(function() {
-  alert("onStartup in background.js");
+  if (searchOptions) {
+    chrome.contextMenus.removeAll();
+    for (let searchItem of searchOptions) {
+      chrome.contextMenus.create(
+        {"title": searchItem.name, "contexts":["selection"], "id": searchItem.url});
+    }
+  }
+}
+
+chrome.contextMenus.onClicked.addListener(function(info, tab) {
+  let urlStr = info.menuItemId.replace(/%s/, info.selectionText);
+  chrome.tabs.create({active:true, index:tab.index+1, url:urlStr});
 });
 
-chrome.runtime.onInstalled.addListener(function() {
-  alert("onInstalled in background.js");
-});
+chrome.runtime.onStartup.addListener(addOptionsToMenus);
+
+chrome.runtime.onInstalled.addListener(addOptionsToMenus);
 
 chrome.browserAction.onClicked.addListener(function(tab) {
   chrome.runtime.openOptionsPage();
 })
 
 chrome.storage.onChanged.addListener(function(changes, areaName) {
+  if (areaName == "sync") {
+    let searchOptions = changes['searchOptions'].newValue;
+    refreshMenus(searchOptions);
+  }
+})
 
-}) 

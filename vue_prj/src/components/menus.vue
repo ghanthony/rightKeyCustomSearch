@@ -1,7 +1,7 @@
 <template>
   <el-container>
     <el-header class="header">
-      <h3>{{extensionName}}</h3>
+      <h2>{{extensionName}}</h2>
     </el-header>
     <el-container>
       <el-aside width="150px">

@@ -2,7 +2,7 @@
   <div>
       <el-card style="max-width: 840px">
         <el-row>
-          <el-col class="col" :span="24">{{searchExampleLabel}}</el-col>
+          <el-col class="col exampleLabel" :span="24">{{searchExampleLabel}}</el-col>
         </el-row>
         <el-row :gutter="20" style="max-width: 800px; padding-left:8px">
           <el-col class="col" :span="4">
@@ -41,13 +41,13 @@
               width='128px'>
               <template slot-scope="scope">
                 <el-button
+                  type="primary" plain
                   size="small"
-                  type="primary"
                   icon="el-icon-edit"
                   @click="handleEdit(scope.$index, scope.row)"></el-button>
                 <el-button
+                  type="danger" plain
                   size="small"
-                  type="danger"
                   icon="el-icon-delete"
                   @click="handleDelete(scope.$index, scope.row)"></el-button>
               </template>
@@ -62,12 +62,13 @@
           </el-table>
         </el-row>
         <el-row>
-          <el-col class="col" :span="24">
+          <el-col class="col opCol" :span="8" :offset="19">
             <el-button
-              icon="el-icon-plus"
-              style="width: 100%; border-radius: 0px; margin-top : -1px; border-style: dotted"
-              @click="handleAdd()">
-            </el-button>
+              type="primary" plain
+              @click="handleAdd()">新 增</el-button>
+            <el-button
+              type="primary"
+              @click="save()">保 存</el-button>
           </el-col>
         </el-row>
       </el-card>
@@ -80,7 +81,7 @@
               <el-input type="text" v-model="form.name" autocomplete="off" maxlength="6" show-word-limit></el-input>
             </el-form-item>
             <el-form-item :label="searchUrlLabel">
-              <el-input v-model="form.url" autocomplete="off"></el-input>
+              <el-input v-model="form.url" type="textarea" :rows="5" autocomplete="off" maxlength="200" show-word-limit></el-input>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer">
@@ -114,15 +115,7 @@ export default {
       sameNameParamAlert: '搜索项不能同名',
       cancelStr: '取 消',
       okStr: '确 定',
-      tableData: [
-        {
-          name: '谷歌',
-          url: 'http://www.google.com#q=%s'
-        }, {
-          name: '虾米找歌',
-          url: 'http://www.xiami.com/search/song?key=%s'
-        }
-      ],
+      tableData: [],
       form: {
         name: '',
         url: '',
@@ -132,8 +125,21 @@ export default {
   },
   mounted () {
     this.rowDrop()
+    const _this = this
+    this.getTableData(function (data) {
+      _this.tableData = data || []
+    })
   },
   methods: {
+    getTableData (callback) {
+      chrome.storage.sync.get('searchOptions', function (result) {
+        if (chrome.runtime.lastError) {
+          alert(chrome.runtime.lastError.message)
+        } else {
+          callback(result['searchOptions'])
+        }
+      })
+    },
     handleEdit (index, row) {
       this.isOpTypeAdd = false
       this.searchOpTitleLabel = this.searchOpTitleEditLabel
@@ -186,6 +192,13 @@ export default {
           console.log('evt.newIndex ' + evt.newIndex)
         }
       })
+    },
+    save () {
+      chrome.storage.sync.set({'searchOptions': this.tableData}, function () {
+        if (chrome.runtime.lastError) {
+          alert(chrome.runtime.lastError.message)
+        }
+      })
     }
   }
 }
@@ -195,7 +208,13 @@ export default {
   .col {
     padding-bottom: 20px;
   }
+  .opCol {
+    padding-top: 20px;
+  }
   .dragHandle {
     cursor: move;
+  }
+  .exampleLabel {
+    font-size: 14px;
   }
 </style>
